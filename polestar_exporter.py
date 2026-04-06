@@ -64,22 +64,22 @@ class PolestarExporter:
                 # Metrics from gRPC (preferred as it's richer)
                 if grpc_battery:
                     BATTERY_LEVEL.labels(**labels).set(grpc_battery.battery_charge_level_percentage or 0)
-                    RANGE_KM.labels(**labels).set(grpc_battery.estimated_distance_to_empty_km or 0)
-                    RANGE_MI.labels(**labels).set(grpc_battery.estimated_distance_to_empty_miles or 0)
-                    CHARGING_POWER.labels(**labels).set(grpc_battery.charging_power_watts or 0)
-                    CHARGING_CURRENT.labels(**labels).set(grpc_battery.charging_current_amps or 0)
-                    CHARGING_VOLTAGE.labels(**labels).set(grpc_battery.charging_voltage_volts or 0)
+                    RANGE_KM.labels(**labels).set(getattr(grpc_battery, 'estimated_distance_to_empty_km', 0) or 0)
+                    RANGE_MI.labels(**labels).set(getattr(grpc_battery, 'estimated_distance_to_empty_miles', 0) or 0)
+                    CHARGING_POWER.labels(**labels).set(getattr(grpc_battery, 'charging_power_watts', 0) or 0)
+                    CHARGING_CURRENT.labels(**labels).set(getattr(grpc_battery, 'charging_current_amps', 0) or 0)
+                    CHARGING_VOLTAGE.labels(**labels).set(getattr(grpc_battery, 'charging_voltage_volts', 0) or 0)
                     
-                    if grpc_battery.average_energy_consumption_kwh_per_100km:
+                    if getattr(grpc_battery, 'average_energy_consumption_kwh_per_100km', None):
                         AVG_CONSUMPTION.labels(vin=vin, model=model, type='lifetime').set(grpc_battery.average_energy_consumption_kwh_per_100km)
-                    if grpc_battery.average_energy_consumption_kwh_per_100km_automatic:
+                    if getattr(grpc_battery, 'average_energy_consumption_kwh_per_100km_automatic', None):
                         AVG_CONSUMPTION.labels(vin=vin, model=model, type='automatic').set(grpc_battery.average_energy_consumption_kwh_per_100km_automatic)
-                    if grpc_battery.average_energy_consumption_kwh_per_100km_since_charge:
+                    if getattr(grpc_battery, 'average_energy_consumption_kwh_per_100km_since_charge', None):
                         AVG_CONSUMPTION.labels(vin=vin, model=model, type='since_charge').set(grpc_battery.average_energy_consumption_kwh_per_100km_since_charge)
                     
-                    if grpc_battery.total_energy_consumption_wh:
+                    if getattr(grpc_battery, 'total_energy_consumption_wh', None):
                         TOTAL_ENERGY.labels(vin=vin, model=model, type='lifetime').set(grpc_battery.total_energy_consumption_wh / 1000.0)
-                    if grpc_battery.total_energy_consumption_wh_since_charge:
+                    if getattr(grpc_battery, 'total_energy_consumption_wh_since_charge', None):
                         TOTAL_ENERGY.labels(vin=vin, model=model, type='since_charge').set(grpc_battery.total_energy_consumption_wh_since_charge / 1000.0)
                 
                 logger.info(f"Metrics updated for {model} ({vin})")
